@@ -29,7 +29,13 @@ static uint32_t PutDdrErrInfo(void)
 	PutStr(" true  data     : H'",0);	Data2HexAscii(gTrueDdrData,str,4);	PutStr(str,1);
 }
 
-static uint32_t CkExtendDdrRamCheck(void* ramAddr)
+/*!
+ * @brief Memory test
+ * @param ramAddr - start address
+ * @param len - in bytes
+ * @return
+ */
+static uint32_t CkExtendDdrRamCheck(void* ramAddr, int len)
 {
 	volatile uint32_t *read_adr;
 	uint32_t data;
@@ -37,18 +43,19 @@ static uint32_t CkExtendDdrRamCheck(void* ramAddr)
 	char str[64];
 
 	read_adr = (uint32_t *)ramAddr;
+	len /= 4;	// convert to 32-bit words
 
 	PutStr("Data=0x5A5A5A5A",0);
 
 	/* Write */
 	data = 0x5A5A5A5A;
-	for (loop = 0; loop < 0x100000; loop++)
+	for (loop = 0; loop < len; loop++)
 	{
 		read_adr[loop] = data;
 	}
 	/* Verify */
 	data = 0x5A5A5A5A;
-	for (loop = 0; loop < 0x100000; loop++)
+	for (loop = 0; loop < len; loop++)
 	{
 		if (read_adr[loop] != data)
 		{
@@ -63,13 +70,13 @@ static uint32_t CkExtendDdrRamCheck(void* ramAddr)
 
 	/* Write */
 	data = 0xA5A5A5A5;
-	for (loop = 0; loop < 0x100000; loop++)
+	for (loop = 0; loop < len; loop++)
 	{
 		read_adr[loop] = data;
 	}
 	/* Verify */
 	data = 0xA5A5A5A5;
-	for (loop = 0; loop < 0x100000; loop++)
+	for (loop = 0; loop < len; loop++)
 	{
 		if (read_adr[loop] != data)
 		{
@@ -84,14 +91,14 @@ static uint32_t CkExtendDdrRamCheck(void* ramAddr)
  
 	/* Write */
 	data = 0x12345678;
-	for (loop = 0; loop < 0x100000; loop++)
+	for (loop = 0; loop < len; loop++)
 	{
 		read_adr[loop] = data;
 		data += 0x11111111;
 	}
 	/* Verify */
 	data = 0x12345678;
-	for (loop = 0; loop < 0x100000; loop++)
+	for (loop = 0; loop < len; loop++)
 	{
 		if (read_adr[loop] != data)
 		{
@@ -358,9 +365,13 @@ static int32_t TPRAMCK( uint8_t *startAddr, uint8_t *endAddr )
 	return NORMAL_END;
 }
 
+#define START_ADDR		(0x41000000)
+#define TEST_SIZE		(1024 * 1024 * 16)		// in bytes
+
 void dgDdrTest(void)
 {
 	uint32_t readData;
+	char str[32];
 
 	PutStr("=== DDR R/W CHECK ====",1);
 #if (RZG2L == 1)
@@ -368,9 +379,17 @@ void dgDdrTest(void)
 #elif (RZG2LC == 1)
 	PutStr("=== RZ/G2LC (Memory controller is only channel 1) ===",1);
 #endif
-	readData = *((volatile uint32_t*)0x000000041000000);	//Access Check
-	PutStr("Check:0x00_41000000 ... ",0);
-	if (CkExtendDdrRamCheck((void*)0x000000041000000))
+	readData = *((volatile uint32_t*)START_ADDR);	//Access Check
+
+	PutStr("Check: ", 0);
+	Data2HexAscii(START_ADDR, str, SIZE_32BIT);
+	PutStr(str, 0);
+
+	PutStr(", Length: ", 0);
+	Data2HexAscii(TEST_SIZE, str, SIZE_32BIT);
+	PutStr(str, 1);
+
+	if (CkExtendDdrRamCheck((void*)START_ADDR, TEST_SIZE))
 	{
 		PutStr(" Fail!",1);
 		PutDdrErrInfo();
@@ -382,7 +401,7 @@ void dgDdrTest(void)
 	}
 #if (DDR_SIZE_1GB == 0) && (DDR_SIZE_1GB_1PCS == 0) && (DDR_SIZE_512MB_1PCS == 0)
 	PutStr("Check:0x00_80000000 ... ",0);
-	if (CkExtendDdrRamCheck((void*)0x000000080000000))
+	if (CkExtendDdrRamCheck((void*)0x000000080000000, TEST_SIZE))
 	{
 		PutStr(" Fail!",1);
 		PutDdrErrInfo();
@@ -394,7 +413,7 @@ void dgDdrTest(void)
 	}
 #if (DDR_SIZE_4GB == 1)
 	PutStr("Check:0x00_c0000000 ... ",0);
-	if (CkExtendDdrRamCheck((void*)0x0000000c0000000))
+	if (CkExtendDdrRamCheck((void*)0x0000000c0000000, TEST_SIZE))
 	{
 		PutStr(" Fail!",1);
 		PutDdrErrInfo();
@@ -405,7 +424,7 @@ void dgDdrTest(void)
 		PutStr(" Pass!",1);
 	}
 	PutStr("Check:0x01_00000000 ... ",0);
-	if (CkExtendDdrRamCheck((void*)0x000000100000000))
+	if (CkExtendDdrRamCheck((void*)0x000000100000000, TEST_SIZE))
 	{
 		PutStr(" Fail!",1);
 		PutDdrErrInfo();
