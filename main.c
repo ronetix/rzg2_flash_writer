@@ -24,6 +24,7 @@
 #include "syc.h"
 #include "ddr.h"
 #include "sysc.h"
+#include "ddrcheck.h"
 
 #define	RZG2L_DEVID		(0x841C447)
 #define	RZV2L_DEVID		(0x8447447)
@@ -67,11 +68,14 @@ void Main(void)
 
 #if (INTERNAL_MEMORY_ONLY == 0)
 	ddr_setup();
+	PutStr("DDR init done.", 1);
+	dgDdrTest();
 #endif
-	gUDump[0] =  gUMem[0] =  0;
+
+	gUDump[0] =  gUMem[0] =  0x40000000;
 	gUDump[1] =  gUMem[1] =  255;
 
-	gDumpMode	= SIZE_8BIT;
+	gDumpMode	= SIZE_32BIT;
 	gDumpStatus	= DISABLE;
 
 	InitRPC_Mode();
