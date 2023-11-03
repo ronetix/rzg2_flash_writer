@@ -5,7 +5,7 @@
 #
 
 ifeq ("$(BOARD)", "")
-BOARD = RZG2L_SMARC
+BOARD = RZG2UL_SMARC
 endif
 
 ifeq ("$(BOARD)", "RZG2L_SMARC")
