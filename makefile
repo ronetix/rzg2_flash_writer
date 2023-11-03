@@ -5,7 +5,7 @@
 #
 
 ifeq ("$(BOARD)", "")
-BOARD = RZG2L_SMARC
+BOARD = RZG2UL_SMARC
 endif
 
 ifeq ("$(BOARD)", "RZG2L_SMARC")
@@ -219,7 +219,7 @@ AArch32_64  = AArch64
 BOOTDIR     = AArch64_boot
 OUTPUT_DIR  = AArch64_output
 OBJECT_DIR  = AArch64_obj
-CROSS_COMPILE ?= aarch64-elf-
+CROSS_COMPILE ?= aarch64-none-elf-
 
 CFLAGS += -O0 -fno-stack-protector -fno-exceptions -fno-unwind-tables -fno-asynchronous-unwind-tables
 BOOT_DEF    = Writer
