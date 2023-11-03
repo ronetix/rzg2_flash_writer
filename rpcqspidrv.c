@@ -330,23 +330,28 @@ void WriteDataPpWithBufferQspiFlash(uint32_t addr, uint32_t source_addr)
 		//bit9   RCF         =  1 : Read Cache Clear
 
 	*((volatile uint32_t*)RPC_PHYCNT)    = 0x80030274;
+		//bit31  CAL         =  1 : PHY calibration
+		//bit2   WBUF        =  1 : Write Buffer Enable
+		//bit1-0 PHYMEM[1:0] = 00 : QSPI-SDR
 
 	for(i = 0; i < 256; i = i+0x4)
 	{
 		(*(volatile uint32_t*)(RPC_WRBUF+i)) = (*(volatile uint32_t*)(source_addr+i));
 	}
-		//bit31  CAL         =  1 : PHY calibration
-		//bit2   WBUF        =  1 : Write Buffer Enable
-		//bit1-0 PHYMEM[1:0] = 00 : QSPI-SDR
+
 	*((volatile uint32_t*)RPC_CMNCR)      = 0x81FFF300;
 		//bit31  MD       =  1 : Manual mode
 		//bit1-0 BSZ[1:0] = 00 : QSPI Flash x 1
+
 	*((volatile uint32_t*)RPC_SMCMR)      = 0x00020000;
 		//bit23-16 CMD[7:0] = 0x02 : Page Program 3-byte address
+
 	*((volatile uint32_t*)RPC_SMADR)      = addr;
+
 	*((volatile uint32_t*)RPC_SMDRENR)    = 0x00000000;
 		//bit8 ADDRE  = 0 : Address SDR transfer
 		//bit0 SPIDRE = 0 : DATA SDR transfer
+
 	*((volatile uint32_t*)RPC_SMENR)      = 0x0000470F;
 		//bit31-30 CDB[1:0]   =   00 : 1bit width command (QSPI0_MOSI)
 		//bit25-24 ADB[1:0]   =   00 : 1bit width address (QSPI0_MOSI)
@@ -355,6 +360,7 @@ void WriteDataPpWithBufferQspiFlash(uint32_t addr, uint32_t source_addr)
 		//bit14    CDE        =    1 : Command enable
 		//bit11-8  ADE[3:0]   = 0111 : ADR[23:0] is output
 		//bit3-0   SPIDE[3:0] = 1111 : 32bit transfer
+
 	*((volatile uint32_t*)RPC_SMCR)       = 0x00000003;
 		//bit2     SPIRE      = 0 : Data read disable
 		//bit1     SPIWE      = 1 : Data write enable
