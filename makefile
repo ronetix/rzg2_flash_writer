@@ -432,6 +432,21 @@ DEPEND_FILE = $(patsubst %.lib, ,$(OBJ_FILE:%.o=%.d)) $(LINKER_FILE:.s=.d)
 
 ###################################################
 #C compiler
+ifeq ($(origin CC),default)
+CC = $(CROSS_COMPILE)gcc
+#C++ compiler
+CPP = $(CROSS_COMPILE)cpp
+#Assembler
+AS = $(CROSS_COMPILE)as
+#Linker
+LD = $(CROSS_COMPILE)ld
+#Liblary
+AR = $(CROSS_COMPILE)ar
+#Object dump
+OBJDUMP = $(CROSS_COMPILE)objdump
+#Object copy
+OBJCOPY = $(CROSS_COMPILE)objcopy
+else
 CC ?= $(CROSS_COMPILE)gcc
 #C++ compiler
 CPP ?= $(CROSS_COMPILE)cpp
@@ -445,6 +460,7 @@ AR ?= $(CROSS_COMPILE)ar
 OBJDUMP ?= $(CROSS_COMPILE)objdump
 #Object copy
 OBJCOPY ?= $(CROSS_COMPILE)objcopy
+endif
 
 #clean
 CL = rm -rf
@@ -458,6 +474,9 @@ CL = rm -rf
 
 .PHONY: all
 all: $(OBJECT_DIR) $(OUTPUT_DIR) $(OBJ_FILE_BOOT) $(OBJ_FILE) $(OUTPUT_FILE) $(MEMORY_DEF)
+
+ilko:
+	@echo "ILKO $(CC)"
 
 #------------------------------------------
 # Make Directory
